@@ -11,7 +11,7 @@
   --edge: rgba(17, 17, 26, 0.08);
   --text: #16161d;
   --muted: #6b6b78;
-  --accent: #7c3aed;
+  --accent: #6e02db; /* Tech Council of Australia brand purple */
 }
 
 .dark {
@@ -21,7 +21,7 @@
   --edge: rgba(255, 255, 255, 0.09);
   --text: #f5f5f7;
   --muted: #9a9aa7;
-  --accent: #a584f7;
+  --accent: #a974f9; /* lighter TCA purple for contrast on dark */
 }
 
 @theme inline {

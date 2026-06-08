@@ -172,6 +172,11 @@ export default function App() {
         ) : (
           <StatsView habits={habits} />
         )}
+
+        <footer className="mt-12 flex items-center justify-center gap-2 border-t border-edge pt-6">
+          <img src="/tca-logo.jpg" alt="" className="h-4 w-4 rounded-[3px] opacity-80" />
+          <span className="text-xs text-muted">Tech Council of Australia</span>
+        </footer>
       </main>
 
       <BottomNav view={view} onViewChange={setView} onAddClick={openAdd} />

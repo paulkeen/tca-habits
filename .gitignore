@@ -21,3 +21,6 @@ dist/
 
 # Claude Code
 .claude/
+
+# Large brand reference (kept locally, not tracked)
+assets/Tech-Council_Brand-guidelines.pdf
