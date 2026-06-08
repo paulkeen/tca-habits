@@ -553,7 +553,7 @@ wheels = [
 ]
 
 [[package]]
-name = "streaklife-backend"
+name = "tca-habits-backend"
 version = "1.0.0"
 source = { virtual = "." }
 dependencies = [

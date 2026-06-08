@@ -4,7 +4,7 @@ Track family routines, fitness goals, and hobbies as a grid of colored tiles. Ta
 
 Light and dark themes (follows your OS, with a manual toggle), responsive from phone to desktop.
 
-> **This is the Week starter project for the Tech Council Australia Agentic Engineer course.**
+> **This is the starter project for the Tech Council Australia Agentic Engineer course.**
 
 ---
 
