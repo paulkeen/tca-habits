@@ -2,7 +2,7 @@
 
 Track family routines, fitness goals, and hobbies as a grid of colored tiles. Tap a tile to complete it for the day and watch it fill with its color; build streaks, and review your history with a 30-day heatmap.
 
-Light and dark themes (follows your OS, with a manual toggle), responsive from phone to desktop.
+Light and dark themes, responsive from phone to desktop.
 
 > **This is the starter project for the Tech Council Australia Agentic Engineer course.**
 
