@@ -17,13 +17,13 @@ make dev            # or: ./scripts/dev.sh
 # Backend: :8000, Frontend: :5173 (proxies /habits, /stats, /encouragement to backend)
 
 # Tests (backend only; frontend has no test suite)
-make test           # or: cd backend && uv run pytest tests/test_api.py -v
+make test           # or: cd backend && uv run pytest tests -q
 
 # Single test
 cd backend && uv run pytest tests/test_api.py::test_name -v
 
-# Coverage
-cd backend && uv run pytest tests/test_api.py -v --cov=. --cov-report=html
+# The full harness the Stop hook runs each turn: lint + types + tests
+make check          # = make lint + make typecheck + make test
 
 # Production frontend build
 make build          # or: cd frontend && npm run build
@@ -69,3 +69,9 @@ backend/
 **Tailwind v4:** Uses `@tailwindcss/vite` plugin, not the classic PostCSS config. Theme tokens are CSS custom properties in `index.css`, not `tailwind.config.js`.
 
 **AI features (optional):** `GET /stats/weekly-summary` and `GET /encouragement` return copy that is model-written when `ANTHROPIC_API_KEY` is set (and `uv sync --extra ai` has installed the `anthropic` package), and a deterministic template otherwise. All model calls go through `ai.generate()` in `backend/ai.py`, which never raises — any failure returns the template. Responses carry a `source` field (`"model"` or `"template"`) so the UI can badge AI-written text. The clean-clone default is template mode; **never make these endpoints require a key.** Model defaults to `claude-haiku-4-5`, overridable via `ANTHROPIC_MODEL`.
+
+**Streak logic is guarded:** `.claude/hooks/guard_streak.py` (a committed `PreToolUse` hook) blocks edits to `compute_streak`/streak logic in `main.py` unless a test under `backend/tests/` also changes. Never change the streak calculation without a test — this is enforced, not just documented.
+
+**Models are SQLAlchemy 2.0 typed:** `models.py` uses `Mapped[...]` / `mapped_column`, so `mypy` sees real attribute types. Keep that style when adding columns. `make check` (ruff + mypy + pytest) must stay green — CI enforces it.
+
+**Sub-agents:** `.claude/agents/` defines `test-writer` (failing tests first), `reviewer` (read-only, no write tools), and `verifier` (runs `make check` + smoke test). Keep each prompt narrow and its tools minimal.

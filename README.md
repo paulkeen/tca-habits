@@ -38,13 +38,32 @@ The Vite dev server proxies `/habits`, `/stats`, and `/encouragement` to the bac
 
 ---
 
-## Tests
+## Tests & checks
 
 ```bash
-cd backend && uv run pytest tests/test_api.py -v   # or: make test
+make test     # backend suite (tests/) — isolated temp SQLite DBs
+make lint     # ruff
+make typecheck # mypy
+make check    # lint + types + tests — the harness the agent runs each turn
 ```
 
 Tests use isolated temporary SQLite databases and never touch your dev database.
+
+## Hardening (Section 3)
+
+This checkpoint adds the engineering that makes the agent's output trustworthy:
+
+- **Test/eval harness** — `backend/tests/` covers the streak edge cases (missed-day
+  resets, idempotency, weekday scheduling, month/timezone boundaries) plus the AI
+  fallback behaviour. `make check` runs lint + types + tests.
+- **Sub-agents** (`.claude/agents/`) — a `test-writer`, a read-only `reviewer`, and
+  a `verifier`, each with a narrow job and minimal tools.
+- **Guardrail hooks** (`.claude/settings.json`) — a `Stop` hook runs `make check`
+  each turn; a `PreToolUse` hook (`.claude/hooks/guard_streak.py`) blocks edits to
+  the streak logic unless a test changes too.
+- **CI** — `.github/workflows/ci.yml` runs the backend harness and the frontend
+  build on every push and pull request.
+- **Security** — see `SECURITY.md`; run `/security-review` before merge.
 
 ---
 
@@ -93,6 +112,7 @@ habit-streak-app/
 | POST | `/habits/{id}/complete` | Mark done today (idempotent) |
 | DELETE | `/habits/{id}/complete` | Unmark today |
 | GET | `/habits/{id}/history` | Last 30 days of completion history |
+| GET | `/habits/{id}/monthly` | This month's completed-vs-due for the progress ring |
 | GET | `/stats` | Global stats (totals, active streaks, perfect days) |
 | GET | `/stats/calendar?days=30` | Per-day completed-vs-due totals across all habits |
 | GET | `/stats/weekly-summary` | A short human paragraph about the week (AI or template) |

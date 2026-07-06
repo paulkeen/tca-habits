@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import type { Habit, DayHistory } from '../types';
+import type { Habit, DayHistory, MonthlyProgress } from '../types';
 import { habitColor } from '../lib/colors';
 import { api } from '../api';
 import { Modal } from './Modal';
+import { ProgressRing } from './ProgressRing';
 
 interface HabitDetailModalProps {
   habit: Habit;
@@ -55,6 +56,7 @@ function Stat({ label, value }: { label: string; value: number | string }) {
 
 export function HabitDetailModal({ habit, onClose, onEdit, onDelete }: HabitDetailModalProps) {
   const [history, setHistory] = useState<DayHistory[]>([]);
+  const [monthly, setMonthly] = useState<MonthlyProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const { base } = habitColor(habit.color);
 
@@ -64,6 +66,7 @@ export function HabitDetailModal({ habit, onClose, onEdit, onDelete }: HabitDeta
       .getHistory(habit.id)
       .then((h) => active && setHistory(h))
       .finally(() => active && setLoading(false));
+    api.getMonthly(habit.id).then((m) => active && setMonthly(m)).catch(() => {});
     return () => {
       active = false;
     };
@@ -82,12 +85,20 @@ export function HabitDetailModal({ habit, onClose, onEdit, onDelete }: HabitDeta
           >
             {habit.emoji}
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h2 className="truncate text-lg font-bold text-text">{habit.name}</h2>
             <p className="text-sm capitalize text-muted">
               {habit.category} · {scheduleLabel}
             </p>
           </div>
+          {monthly && (
+            <div className="flex flex-shrink-0 flex-col items-center">
+              <ProgressRing ratio={monthly.percent / 100} size={52} stroke={5} color={base}>
+                <span className="text-xs font-bold tabular-nums text-text">{monthly.percent}%</span>
+              </ProgressRing>
+              <span className="mt-1 text-[10px] text-muted">this month</span>
+            </div>
+          )}
         </div>
 
         {/* Stats */}
