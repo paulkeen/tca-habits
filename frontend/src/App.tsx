@@ -1,100 +1,235 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect, useCallback } from 'react';
+import type { Habit, View, HabitCreate, HabitUpdate, Encouragement } from './types';
+import { api } from './api';
+import { watchSystemTheme } from './lib/theme';
+import { Header } from './components/Header';
+import { BottomNav } from './components/BottomNav';
+import { HabitTile } from './components/HabitTile';
+import { AddHabitModal } from './components/AddHabitModal';
+import { HabitDetailModal } from './components/HabitDetailModal';
+import { StatsView } from './components/StatsView';
 
-type Habit = {
-  id: number;
-  name: string;
-  emoji: string;
-  completed_today: boolean;
-  streak: number;
-};
+const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
+
+/** Local guess applied instantly on tap; reconciled with the server response. */
+function optimisticToggle(h: Habit, nowDone: boolean): Habit {
+  const delta = nowDone ? 1 : -1;
+  return {
+    ...h,
+    completed_today: nowDone,
+    current_streak: Math.max(0, h.current_streak + delta),
+    total_completions: Math.max(0, h.total_completions + delta),
+    week_completed: clamp(h.week_completed + delta, 0, h.week_due),
+  };
+}
 
 export default function App() {
+  const [view, setView] = useState<View>('today');
   const [habits, setHabits] = useState<Habit[]>([]);
-  const [name, setName] = useState("");
-  const [emoji, setEmoji] = useState("✅");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingHabit, setEditingHabit] = useState<Habit | undefined>(undefined);
+  const [detailHabit, setDetailHabit] = useState<Habit | undefined>(undefined);
+  const [encouragement, setEncouragement] = useState<Encouragement | null>(null);
 
-  async function load() {
-    const res = await fetch("/habits");
-    setHabits(await res.json());
-  }
+  useEffect(() => watchSystemTheme(), []);
 
-  useEffect(() => {
-    load();
+  const fetchHabits = useCallback(async () => {
+    setError('');
+    try {
+      setHabits(await api.getHabits());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load habits');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  async function toggle(h: Habit) {
-    const method = h.completed_today ? "DELETE" : "POST";
-    await fetch(`/habits/${h.id}/complete`, { method });
-    load();
-  }
+  // The streak-at-risk nudge. Refetched after toggles so it clears once you've
+  // secured the streak it was warning about.
+  const fetchEncouragement = useCallback(async () => {
+    try {
+      setEncouragement(await api.getEncouragement());
+    } catch {
+      setEncouragement(null);
+    }
+  }, []);
 
-  async function addHabit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!name.trim()) return;
-    await fetch("/habits", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, emoji }),
-    });
-    setName("");
-    setEmoji("✅");
-    load();
-  }
+  useEffect(() => {
+    fetchHabits();
+    fetchEncouragement();
+  }, [fetchHabits, fetchEncouragement]);
+
+  const handleToggle = useCallback(async (id: number, completed: boolean) => {
+    setHabits((prev) => prev.map((h) => (h.id === id ? optimisticToggle(h, !completed) : h)));
+    try {
+      const updated = completed ? await api.uncompleteHabit(id) : await api.completeHabit(id);
+      setHabits((prev) => prev.map((h) => (h.id === id ? updated : h)));
+      fetchEncouragement(); // the at-risk nudge may have changed
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to update habit');
+      fetchHabits(); // revert to server truth
+    }
+  }, [fetchHabits, fetchEncouragement]);
+
+  const handleCreate = useCallback(async (data: HabitCreate) => {
+    const created = await api.createHabit(data);
+    setHabits((prev) => [...prev, created]);
+  }, []);
+
+  const handleUpdate = useCallback(async (id: number, data: HabitUpdate) => {
+    const updated = await api.updateHabit(id, data);
+    setHabits((prev) => prev.map((h) => (h.id === id ? updated : h)));
+  }, []);
+
+  const handleDelete = useCallback(async (id: number) => {
+    if (!confirm('Delete this habit and all its history?')) return;
+    setDetailHabit(undefined);
+    try {
+      await api.deleteHabit(id);
+      setHabits((prev) => prev.filter((h) => h.id !== id));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to delete habit');
+    }
+  }, []);
+
+  const openAdd = () => {
+    setEditingHabit(undefined);
+    setShowAddModal(true);
+  };
+  const openEdit = (habit: Habit) => {
+    setDetailHabit(undefined);
+    setEditingHabit(habit);
+    setShowAddModal(true);
+  };
+
+  const dueHabits = habits.filter((h) => h.is_due_today);
+  const notDueHabits = habits.filter((h) => !h.is_due_today);
+  const completedToday = dueHabits.filter((h) => h.completed_today).length;
+  const allDone = dueHabits.length > 0 && completedToday === dueHabits.length;
+
+  const gridCls = 'grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5';
 
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", maxWidth: 480, margin: "2rem auto", padding: "0 1rem" }}>
-      <h1>🔥 TCA Habits</h1>
+    <div className="min-h-screen bg-bg text-text">
+      <Header view={view} onViewChange={setView} onAddClick={openAdd} />
 
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {habits.map((h) => (
-          <li
-            key={h.id}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.75rem",
-              padding: "0.6rem 0",
-              borderBottom: "1px solid #eee",
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={h.completed_today}
-              onChange={() => toggle(h)}
-              style={{ width: 20, height: 20 }}
-            />
-            <span style={{ flex: 1 }}>
-              {h.emoji} {h.name}
-            </span>
-            <span
-              style={{
-                background: h.streak > 0 ? "#fde68a" : "#f1f5f9",
-                borderRadius: 999,
-                padding: "0.2rem 0.6rem",
-                fontSize: 14,
-              }}
-            >
-              {h.streak > 0 ? `🔥 ${h.streak}` : "—"}
-            </span>
-          </li>
-        ))}
-      </ul>
+      <main className="mx-auto max-w-5xl px-4 pb-28 pt-5 sm:px-6 sm:pb-10">
+        {error && (
+          <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-500">
+            <span>⚠️</span>
+            <span>{error}</span>
+            <button onClick={() => setError('')} className="ml-auto opacity-60 hover:opacity-100" aria-label="Dismiss error">✕</button>
+          </div>
+        )}
 
-      <form onSubmit={addHabit} style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
-        <input
-          value={emoji}
-          onChange={(e) => setEmoji(e.target.value)}
-          style={{ width: 44, textAlign: "center" }}
-          aria-label="emoji"
+        {loading ? (
+          <div className={gridCls}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="aspect-square animate-pulse rounded-[var(--radius-tile)] bg-surface" />
+            ))}
+          </div>
+        ) : view === 'today' ? (
+          <div className="animate-fade-in">
+            {encouragement && encouragement.habit_id !== null && (
+              <div className="mb-5 flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-sm text-amber-600 dark:text-amber-400">
+                <span>🔥</span>
+                <span className="flex-1">{encouragement.message}</span>
+                {encouragement.source === 'model' && (
+                  <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-medium">✨ AI</span>
+                )}
+              </div>
+            )}
+            <div className="mb-6">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-sm text-muted">
+                  {dueHabits.length > 0 ? `${completedToday} of ${dueHabits.length} done today` : 'Nothing scheduled today'}
+                </p>
+                {allDone && <span className="text-sm font-semibold text-green-500">Perfect day! 🎉</span>}
+              </div>
+              {dueHabits.length > 0 && (
+                <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{ width: `${(completedToday / dueHabits.length) * 100}%`, backgroundColor: allDone ? '#34c759' : 'var(--color-accent)' }}
+                  />
+                </div>
+              )}
+            </div>
+
+            {dueHabits.length > 0 && (
+              <div className={`${gridCls} mb-8`}>
+                {dueHabits.map((h) => (
+                  <HabitTile key={h.id} habit={h} onToggle={handleToggle} onOpenDetail={setDetailHabit} />
+                ))}
+              </div>
+            )}
+
+            {notDueHabits.length > 0 && (
+              <>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">Not scheduled today</p>
+                <div className={gridCls}>
+                  {notDueHabits.map((h) => (
+                    <HabitTile key={h.id} habit={h} onToggle={handleToggle} onOpenDetail={setDetailHabit} />
+                  ))}
+                </div>
+              </>
+            )}
+
+            {habits.length === 0 && <EmptyState onAdd={openAdd} />}
+          </div>
+        ) : view === 'all' ? (
+          <div className="animate-fade-in">
+            {habits.length === 0 ? (
+              <EmptyState onAdd={openAdd} />
+            ) : (
+              <div className={gridCls}>
+                {habits.map((h) => (
+                  <HabitTile key={h.id} habit={h} onToggle={handleToggle} onOpenDetail={setDetailHabit} dim={false} />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <StatsView habits={habits} />
+        )}
+
+        <footer className="mt-12 flex items-center justify-center gap-2 border-t border-edge pt-6">
+          <img src="/tca-logo.jpg" alt="" className="h-4 w-4 rounded-[3px] opacity-80" />
+          <span className="text-xs text-muted">Tech Council of Australia</span>
+        </footer>
+      </main>
+
+      <BottomNav view={view} onViewChange={setView} onAddClick={openAdd} />
+
+      {showAddModal && (
+        <AddHabitModal
+          onClose={() => {
+            setShowAddModal(false);
+            setEditingHabit(undefined);
+          }}
+          onSave={handleCreate}
+          editingHabit={editingHabit}
+          onUpdate={handleUpdate}
         />
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="New habit…"
-          style={{ flex: 1 }}
-        />
-        <button type="submit">Add</button>
-      </form>
+      )}
+
+      {detailHabit && (
+        <HabitDetailModal habit={detailHabit} onClose={() => setDetailHabit(undefined)} onEdit={openEdit} onDelete={handleDelete} />
+      )}
+    </div>
+  );
+}
+
+function EmptyState({ onAdd }: { onAdd: () => void }) {
+  return (
+    <div className="flex flex-col items-center py-24 text-center">
+      <div className="mb-4 text-5xl">🌱</div>
+      <p className="mb-5 text-sm text-muted">No habits yet. Plant your first one.</p>
+      <button onClick={onAdd} className="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-105">
+        Add a habit
+      </button>
     </div>
   );
 }

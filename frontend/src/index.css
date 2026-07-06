@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+/* Drive dark mode from a `.dark` class on <html> (set by lib/theme.ts and the
+   pre-paint script in index.html), not the OS media query alone. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg: #f3f4f8;
+  --surface: #ffffff;
+  --surface-2: #eceef4;
+  --edge: rgba(17, 17, 26, 0.08);
+  --text: #16161d;
+  --muted: #6b6b78;
+  --accent: #6e02db; /* Tech Council of Australia brand purple */
+}
+
+.dark {
+  --bg: #0b0b0f;
+  --surface: #17171f;
+  --surface-2: #20202b;
+  --edge: rgba(255, 255, 255, 0.09);
+  --text: #f5f5f7;
+  --muted: #9a9aa7;
+  --accent: #a974f9; /* lighter TCA purple for contrast on dark */
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-edge: var(--edge);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+
+  --radius-tile: 1.4rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Disable the iOS tap highlight; tiles have their own feedback. */
+    -webkit-tap-highlight-color: transparent;
+  }
+  button {
+    font-family: inherit;
+  }
+}
+
+/* Respect the safe area on notched phones for the fixed bottom nav. */
+@utility pb-safe {
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-pop { animation: pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.animate-fade-in { animation: fade-in 0.28s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop,
+  .animate-fade-in {
+    animation: none;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -19,9 +19,9 @@ dist/
 *.local
 
 # ---- Secrets / environment ----
+# The AI features read ANTHROPIC_API_KEY from the environment; never commit it.
 .env
 .env.*
-!.env.example
 
 # ---- Editor / OS ----
 .DS_Store
@@ -34,6 +34,12 @@ dist/
 # state is ignored.
 .claude/settings.local.json
 .claude/*.local.json
+
+# ---- Codex ----
+# Likewise, .codex/agents, .codex/hooks(.json) and .codex/prompts are committed
+# course material. Ignore only local, per-machine overrides.
+.codex/*.local.*
+AGENTS.override.md
 
 # ---- Large brand reference (kept locally, not tracked) ----
 assets/Tech-Council_Brand-guidelines.pdf
