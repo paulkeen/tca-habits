@@ -1,14 +1,32 @@
 [project]
 name = "tca-habits-backend"
-version = "0.1.0"
-description = "TCA Habits — basic habit tracker backend (Section 1)"
+version = "1.0.0"
+description = "TCA Habits habit tracker API"
 requires-python = ">=3.11"
 dependencies = [
-    "fastapi>=0.111",
-    "uvicorn[standard]>=0.29",
-    "sqlalchemy>=2.0",
-    "pydantic>=2.0",
+    "fastapi>=0.111.0",
+    "uvicorn[standard]>=0.29.0",
+    "sqlalchemy>=2.0.0",
+    "pydantic>=2.0.0",
+]
+
+[project.optional-dependencies]
+# The AI features (weekly summary, encouragement) call Claude when
+# ANTHROPIC_API_KEY is set. Without this extra, or without a key, they fall
+# back to deterministic templates so the app still runs. Install with:
+#   uv sync --extra ai
+ai = [
+    "anthropic>=0.40.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.27.0",
 ]
 
 [tool.uv]
+# Flat application layout (main.py at the package root), not an installable
+# library — uv installs the dependencies into .venv but doesn't build this.
 package = false

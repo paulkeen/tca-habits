@@ -1,14 +1,15 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 
-// The dev server proxies API calls to the FastAPI backend on :8000,
-// so the frontend can call /habits with same-origin fetches.
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   server: {
     port: 5173,
     proxy: {
-      "/habits": "http://localhost:8000",
+      '/habits': 'http://localhost:8000',
+      '/stats': 'http://localhost:8000',
+      '/encouragement': 'http://localhost:8000',
     },
   },
-});
+})

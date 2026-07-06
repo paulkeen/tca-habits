@@ -19,9 +19,9 @@ dist/
 *.local
 
 # ---- Secrets / environment ----
+# The AI features read ANTHROPIC_API_KEY from the environment; never commit it.
 .env
 .env.*
-!.env.example
 
 # ---- Editor / OS ----
 .DS_Store
