@@ -1,0 +1,39 @@
+# ---- Python / backend ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+pytest-cache-files-*/
+.mypy_cache/
+.ruff_cache/
+
+# ---- Database (created on first run) ----
+*.db
+*.sqlite
+*.sqlite3
+
+# ---- Node / frontend ----
+node_modules/
+dist/
+*.local
+
+# ---- Secrets / environment ----
+.env
+.env.*
+!.env.example
+
+# ---- Editor / OS ----
+.DS_Store
+.vscode/
+.idea/
+
+# ---- Claude Code ----
+# The shared project config IS committed on purpose: .claude/agents, .claude/commands,
+# .claude/hooks and .claude/settings.json are course material. Only local, per-machine
+# state is ignored.
+.claude/settings.local.json
+.claude/*.local.json
+
+# ---- Large brand reference (kept locally, not tracked) ----
+assets/Tech-Council_Brand-guidelines.pdf
