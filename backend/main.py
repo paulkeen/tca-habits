@@ -1,13 +1,15 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, HTTPException, Query
+from datetime import date, timedelta
+from typing import TypedDict
+
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from datetime import date, timedelta
 
 import ai
 import models
 import schemas
-from database import engine, get_db, Base, run_migrations
+from database import Base, engine, get_db, run_migrations
 
 Base.metadata.create_all(bind=engine)
 run_migrations()
@@ -31,7 +33,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-SEED_HABITS = [
+class SeedHabit(TypedDict):
+    name: str
+    emoji: str
+    category: str
+    color: str
+    target_days: list[int]
+
+
+SEED_HABITS: list[SeedHabit] = [
     {"name": "Bath time routine", "emoji": "🛁", "category": "family", "color": "teal", "target_days": [0, 1, 2, 3, 4, 5, 6]},
     {"name": "Bedtime story", "emoji": "📖", "category": "family", "color": "indigo", "target_days": [0, 1, 2, 3, 4, 5, 6]},
     {"name": "Morning run", "emoji": "🏃", "category": "fitness", "color": "orange", "target_days": [1, 2, 3, 4, 5]},
@@ -118,6 +128,21 @@ def week_progress(completion_set: set[str], target_days: list[int], today: date)
     completed = 0
     due = 0
     d = week_start
+    while d <= today:
+        if d.weekday() in weekdays:
+            due += 1
+            if d.isoformat() in completion_set:
+                completed += 1
+        d += timedelta(days=1)
+    return completed, due
+
+
+def month_progress(completion_set: set[str], target_days: list[int], today: date) -> tuple[int, int]:
+    """Completed vs. due scheduled days from the 1st of the month through today."""
+    weekdays = scheduled_weekdays(target_days)
+    completed = 0
+    due = 0
+    d = today.replace(day=1)
     while d <= today:
         if d.weekday() in weekdays:
             due += 1
@@ -252,6 +277,22 @@ def get_history(habit_id: int, db: Session = Depends(get_db)):
     ]
 
 
+@app.get("/habits/{habit_id}/monthly", response_model=schemas.MonthlyProgressOut)
+def get_monthly_progress(habit_id: int, db: Session = Depends(get_db)):
+    """This calendar month's completed-vs-due for one habit, for the progress ring."""
+    habit = get_habit_or_404(habit_id, db)
+    today = date.today()
+    completion_set = {c.completed_date for c in habit.completions}
+    completed, due = month_progress(completion_set, habit.target_days, today)
+    percent = round(100 * completed / due) if due else 0
+    return schemas.MonthlyProgressOut(
+        month=today.strftime("%Y-%m"),
+        completed=completed,
+        due=due,
+        percent=percent,
+    )
+
+
 @app.get("/stats", response_model=schemas.StatsOut)
 def get_stats(db: Session = Depends(get_db)):
     habits = db.query(models.Habit).all()
@@ -363,16 +404,27 @@ def get_weekly_summary(db: Session = Depends(get_db)):
         fallback = "No habits yet. Add one you actually want to build and tick it off today to get started."
     else:
         parts = [f"This week you've completed {total_completed} of {total_due} scheduled habits ({rate}%)."]
-        if best_habit and best_streak > 0:
-            parts.append(f"Your strongest run right now is {best_habit.emoji} {best_habit.name} at {best_streak} day{'s' if best_streak != 1 else ''}.")
-        parts.append("Keep going and the chains only get longer." if rate >= 50 else "A fresh tick today is the easiest way to build momentum.")
+        if best_habit is not None and best_streak > 0:
+            plural = "s" if best_streak != 1 else ""
+            parts.append(
+                f"Your strongest run right now is {best_habit.emoji} {best_habit.name} "
+                f"at {best_streak} day{plural}."
+            )
+        parts.append(
+            "Keep going and the chains only get longer."
+            if rate >= 50
+            else "A fresh tick today is the easiest way to build momentum."
+        )
         fallback = " ".join(parts)
 
+    streak_line = (
+        f"Longest current streak: {best_habit.name} at {best_streak} days. "
+        if best_habit is not None and best_streak > 0
+        else "No active streaks yet. "
+    )
     prompt = (
         f"Habit tracker weekly stats: {total_completed} of {total_due} scheduled "
-        f"completions this week ({rate}%). "
-        + (f"Longest current streak: {best_habit.name} at {best_streak} days. " if best_habit and best_streak > 0 else "No active streaks yet. ")
-        + "Write the reflection paragraph."
+        f"completions this week ({rate}%). " + streak_line + "Write the reflection paragraph."
     )
     summary, source = ai.generate(SUMMARY_SYSTEM, prompt, fallback)
     return schemas.WeeklySummaryOut(summary=summary, source=source)

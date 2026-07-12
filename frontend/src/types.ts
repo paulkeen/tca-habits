@@ -48,6 +48,13 @@ export interface Encouragement {
   source: 'model' | 'template';
 }
 
+export interface MonthlyProgress {
+  month: string; // "YYYY-MM"
+  completed: number;
+  due: number;
+  percent: number; // 0-100
+}
+
 export interface HabitCreate {
   name: string;
   emoji: string;

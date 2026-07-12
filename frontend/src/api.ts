@@ -7,6 +7,7 @@ import type {
   HabitUpdate,
   WeeklySummary,
   Encouragement,
+  MonthlyProgress,
 } from './types';
 
 const BASE = '/habits';
@@ -44,6 +45,9 @@ export const api = {
 
   getHistory: (id: number) =>
     request<DayHistory[]>(`${BASE}/${id}/history`),
+
+  getMonthly: (id: number) =>
+    request<MonthlyProgress>(`${BASE}/${id}/monthly`),
 
   getStats: () => request<Stats>('/stats'),
 

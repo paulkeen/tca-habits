@@ -1,7 +1,7 @@
-from pydantic import BaseModel, field_validator
 from datetime import datetime
 from typing import Optional
 
+from pydantic import BaseModel, field_validator
 
 VALID_CATEGORIES = {"family", "fitness", "hobby", "personal"}
 
@@ -115,6 +115,13 @@ class StatsOut(BaseModel):
     active_streaks: int
     perfect_days_this_week: int
     longest_streak_ever: int
+
+
+class MonthlyProgressOut(BaseModel):
+    month: str  # "YYYY-MM"
+    completed: int
+    due: int
+    percent: int  # 0-100, completed/due rounded
 
 
 class WeeklySummaryOut(BaseModel):
