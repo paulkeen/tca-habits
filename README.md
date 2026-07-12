@@ -56,14 +56,20 @@ This checkpoint adds the engineering that makes the agent's output trustworthy:
 - **Test/eval harness** — `backend/tests/` covers the streak edge cases (missed-day
   resets, idempotency, weekday scheduling, month/timezone boundaries) plus the AI
   fallback behaviour. `make check` runs lint + types + tests.
-- **Sub-agents** (`.claude/agents/`) — a `test-writer`, a read-only `reviewer`, and
-  a `verifier`, each with a narrow job and minimal tools.
-- **Guardrail hooks** (`.claude/settings.json`) — a `Stop` hook runs `make check`
-  each turn; a `PreToolUse` hook (`.claude/hooks/guard_streak.py`) blocks edits to
-  the streak logic unless a test changes too.
+- **Sub-agents** — a `test-writer`, a read-only `reviewer`, and a `verifier`, each
+  with a narrow job and minimal tools. Defined for both toolchains:
+  `.claude/agents/*.md` (Claude Code) and `.codex/agents/*.toml` (Codex).
+- **Guardrail hooks** — a `Stop` hook runs `make check` each turn; a `PreToolUse`
+  hook blocks edits to the streak logic unless a test changes too. Wired for both:
+  `.claude/settings.json` + `.claude/hooks/guard_streak.py`, and `.codex/hooks.json`
+  + `.codex/hooks/guard_streak.py`.
 - **CI** — `.github/workflows/ci.yml` runs the backend harness and the frontend
   build on every push and pull request.
-- **Security** — see `SECURITY.md`; run `/security-review` before merge.
+- **Security** — see `SECURITY.md`; run a security-review pass before merge.
+
+Whether you drive the project with **Claude Code or OpenAI Codex**, the project
+contract (`AGENTS.md`, which `CLAUDE.md` imports), the sub-agents, and the hooks all
+exist in parallel — see the "Agent tooling" table in `AGENTS.md`.
 
 ---
 

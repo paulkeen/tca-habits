@@ -2,7 +2,7 @@
 """PreToolUse guardrail: block edits to the streak logic unless a test changes too.
 
 The streak calculation is the one piece of logic the whole app hangs on, and the
-CLAUDE.md contract says never to change it without a test. This hook makes that
+AGENTS.md contract says never to change it without a test. This hook makes that
 non-optional rather than something people remember only on good days.
 
 It fires on Edit/Write/MultiEdit. If the edit targets backend/main.py and touches
@@ -46,7 +46,7 @@ def main() -> int:
     sys.stderr.write(
         "Guardrail: this edit changes the streak logic in backend/main.py, but no "
         "test under backend/tests/ has been modified. Add or update a test first "
-        "(CLAUDE.md: never change the streak calculation without a test).\n"
+        "(AGENTS.md: never change the streak calculation without a test).\n"
     )
     return 2  # exit code 2 blocks the tool call and shows stderr to the agent
 

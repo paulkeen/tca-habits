@@ -18,7 +18,7 @@ not skip straight to editing files.
    adding a column. Surface any real engineering decision (e.g. static vs. model
    call) rather than deciding silently. Wait for confirmation on anything risky.
 
-3. **Implement.** Make the change following the conventions in `CLAUDE.md` —
+3. **Implement.** Make the change following the conventions in `AGENTS.md` —
    especially the weekday encoding, the fresh-streak-computation pattern, and the
    "adding a new habit field" checklist. Keep commits small and labelled.
 

@@ -5,12 +5,13 @@ Section 3: the last gate before merge stays human and stays yours.
 
 ## Before merging a change
 
-- Run `/review` and `/security-review` in Claude Code over the diff. Validate
+- Run a review + security-review pass over the diff before merge (Claude Code:
+  `/review` and `/security-review`; Codex has its own review flow). Validate
   correctness, security, and licensing — this gate is not automated away.
 - `make check` (lint + types + tests) must be green. CI enforces it on every push
   and pull request (`.github/workflows/ci.yml`).
-- The guardrail hook (`.claude/hooks/guard_streak.py`) blocks changes to the streak
-  logic unless a test changes too.
+- The guardrail hook blocks changes to the streak logic unless a test changes too
+  (Claude Code: `.claude/hooks/guard_streak.py`; Codex: `.codex/hooks/guard_streak.py`).
 
 ## Secrets
 

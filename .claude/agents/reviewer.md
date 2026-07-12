@@ -12,7 +12,7 @@ What to review (run `git diff` to see the change):
 - **Correctness:** off-by-one in date/streak maths, weekday-convention mistakes
   (`target_days` is 0=Sun..6=Sat; Python `date.weekday()` is Mon=0..Sun=6),
   idempotency holes, timezone/month-boundary bugs.
-- **Contract:** does it follow `CLAUDE.md` — streak computed fresh, migrations
+- **Contract:** does it follow `AGENTS.md` — streak computed fresh, migrations
   added for new columns, the "adding a habit field" checklist?
 - **Tests:** is the new behaviour actually covered? Would the tests fail if the
   logic were wrong?
