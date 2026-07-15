@@ -27,6 +27,7 @@ dist/
 .DS_Store
 .vscode/
 .idea/
+~$*        # Microsoft Office lock/temp files (created while a doc is open)
 
 # ---- Claude Code ----
 # The shared project config IS committed on purpose: .claude/agents, .claude/commands,
