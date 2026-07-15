@@ -41,5 +41,6 @@ dist/
 .codex/*.local.*
 AGENTS.override.md
 
-# ---- Large brand reference (kept locally, not tracked) ----
+# ---- Large brand / course reference (kept locally, not tracked) ----
 assets/Tech-Council_Brand-guidelines.pdf
+assets/TCA Agentic Engineering Program.docx
