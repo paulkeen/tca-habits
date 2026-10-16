@@ -8,6 +8,8 @@ Reviewed 17 October 2026, ahead of the next cohort.
 
 **Bottom line:** the course structure is sound, and so is the code. `make check` is green, the build passes, and the AI endpoints fall back to templates correctly. Most of the work is consistency fixes between the Master deck and the handout, which drifted apart when the run of day changed. Moving worktrees to Section 3 is a good call, and the tools now make the move easy. Windows is the biggest gap: none of the four documents gives a Windows learner a working path except the Codespaces guide, and that guide is aimed at a different problem.
 
+**Update, 17 October (after Paul's first read):** worktrees moving to Section 3 is agreed (M2). Three gaps Paul raised are added as M7 (`/model` and token spend, early in the day), M8 (skills) and M9 (how MCP works). The pre-course setup content now lives in a separate handout for students: `docs/TCA-prerequisites.md`.
+
 Confidence levels: **high** means I checked it in the files or the vendor docs. **Moderate** means it is well supported but I did not test it. **Low** means it rests on third-party sources or inference.
 
 ---
@@ -54,7 +56,7 @@ Either the 12:45 to 13:15 slot is a typo (12:45 to 14:15 would restore 90 minute
 
 Colour tiles, the theme toggle, the encouragement nudge and the MCP stretch become optional extras, or students pick them up from `checkpoint-2-features`.
 
-### M2. Move worktrees into Section 3 and switch to the built-in commands
+### M2. Move worktrees into Section 3 and switch to the built-in commands (agreed)
 
 You are right that the Section 2 version is harder than it needs to be. Students type five raw git commands across two terminals and two tools, and the commands fail in ways that teach them nothing (`invalid reference` without `-b`, getting lost about which terminal is which).
 
@@ -192,6 +194,114 @@ Two related checkpoint points:
 
 **Recommendation:** change slide 41 back to "Scheduled days and colour tiles", or to "Scheduled days" alone if you cut tiles under M1. (high)
 
+### M7. Teach `/model` in the first half hour, before anyone spends tokens
+
+Nothing in the deck or the handout says *when* to change model or effort. The handout's command map has a `/model` row and that's all. This matters more now than it did last cohort, for two reasons:
+
+- **The default is the most expensive general model on every plan.** Claude Code's docs now say Pro, Max, Team and Enterprise all default to Opus 5.5. Earlier versions gave Pro users Sonnet by default. A Pro user running the default all day, then adding a sub-agent team in Section 3, is the person most likely to hit their usage limit at 14:30. (high on the default; moderate on exactly when limits bite, since that depends on the plan and the day's load)
+- **Sub-agents multiply usage.** Each one runs its own context window, so Section 3's four-role team costs several times what one session does.
+
+**Where:** add a fifth row to the cockpit slide (Master slide 23), and spend two minutes on it in the setup check at 09:30, not in Section 3.
+
+| The move | Claude Code | Codex |
+|---|---|---|
+| CHOOSE the model and how hard it thinks | `/model`, `/effort` | `/model` (picks model and reasoning effort) |
+| CHECK what you've spent | `/usage` | `/status` |
+
+**What to tell the room** (one slide, or a box in the handout):
+
+1. **Start the day on a mid-tier model.** `/model sonnet` and `/effort medium` cover all of Sections 1 and 2. In Claude Code, the `/model` choice is saved as your default for new sessions.
+2. **Spend on planning, not typing.** `/model opusplan` uses Opus in plan mode and switches to Sonnet to carry out the plan. That matches the course's "plan review" lesson.
+3. **Narrow agents can be cheap agents.** In Section 3, give the verifier (which only runs `make check`) `model: haiku` in its frontmatter. It reinforces "narrow beats capable" from a cost angle.
+4. **`/clear` saves money as well as quality.** The whole context is sent again on every turn, so a bloated session costs more on each turn as well as giving worse answers. This ties straight into the existing "context is the fuel" slide.
+5. **Check `/usage` at each break.**
+
+Model aliases move (today `sonnet`, `opus` and `haiku` resolve to the 5.5 models), so the slide should name aliases, never version numbers.
+
+### M8. Add skills: the biggest missing topic
+
+The deck teaches commands (Section 2, Move 2) but never mentions skills. Since the last cohort, skills have become the main way both tools package reusable know-how, and the two tools now share one file format. (high, from both vendors' docs)
+
+**What changed:**
+
+- **In Claude Code, commands and skills have merged.** `.claude/commands/add-feature.md` and `.claude/skills/add-feature/SKILL.md` both create `/add-feature`. Skills add a folder for supporting files, frontmatter controls, and the ability for Claude to load them *automatically* when the description matches the task. The docs recommend skills for new work.
+- **Codex uses the same `SKILL.md` format** (`name` plus `description` frontmatter, then instructions), in `.agents/skills/<name>/SKILL.md` in the repo or `~/.agents/skills/` for the user. You invoke one with `$name` or `/skills`, and Codex also picks them implicitly by description.
+- **So one file can serve both tools.** That fixes the clumsiest step in the current course, where Codex users have to *copy* `.codex/prompts/add-feature.md` into `~/.codex/prompts/` by hand.
+
+**The idea to teach is progressive disclosure, and it ties into the context lessons.** Only each skill's name and description sit in context all the time. The body loads when the skill is used, and supporting files only when the body points to them. So a skill can carry a long checklist or reference doc at almost no context cost until it's needed. That is why skills beat pasting the same material into `AGENTS.md`.
+
+**Where:** rewrite Section 2, Move 2 ("Codify a workflow") as **"Move 2 · Skills"**. It keeps the same five-step add-feature body, packaged as a skill.
+
+**Slide content: which mechanism should I use?** This one table ties the whole day together. Show it in Section 2 and bring it back in Section 3:
+
+| You need... | Use | Loaded when | Section |
+|---|---|---|---|
+| Facts that are always true about this repo | `AGENTS.md` / `CLAUDE.md` | Every session, always | 2 |
+| A procedure you run sometimes | **Skill** | When relevant, or when called by name | 2 |
+| A job that needs fresh eyes or narrow tools | Sub-agent | When delegated | 3 |
+| Something that must happen every time, no exceptions | Hook | On the event, enforced | 3 |
+| Data or actions outside the repo | MCP server | Tools listed up front, results on call | 2 |
+
+**Lab change (inside the existing 10-minute Block B):**
+
+```text
+PROMPT
+Turn my add-a-feature recipe into a skill called add-feature that works in
+both Claude Code and Codex: the same SKILL.md in .claude/skills/add-feature/
+and .agents/skills/add-feature/. Write the description so it triggers when I
+ask to add or change a feature, but not for questions or reviews. The body:
+  1. Explore ... (the existing five steps, unchanged)
+```
+
+Then a test that proves the description does its job:
+
+```text
+PROMPT · PROOF THE SKILL TRIGGERS
+Add a "best day of the week" stat to the stats endpoint.
+```
+
+The agent should announce it's using the add-feature skill without being told. If it doesn't, the student rewrites the description. That turns a lesson about descriptions into a two-minute experiment.
+
+**Stretch:** a "catch-me-up" tutor skill for returners ("explain the code I'm about to change, what's changed in this library since 2024, then quiz me"). It links to C2 and is something they'll actually reuse at work.
+
+**Matching repo change:** add `.claude/skills/add-feature/SKILL.md` and `.agents/skills/add-feature/SKILL.md` to `checkpoint-2-features` onwards. Keep `.claude/commands/add-feature.md` for one cohort, then delete it. Update the `AGENTS.md` tooling table. Check whether `~/.codex/prompts` is now deprecated: Codex's skills page doesn't mention it either way. (moderate)
+
+### M9. Explain how MCP works, not only what it is
+
+Slide 39 gives a one-paragraph definition and a calendar example. Students then try to connect a calendar, and the attempt is likely to fail. Claude.ai connectors such as Google Calendar have to be connected at claude.ai first, and they don't work if you're logged in with an API key (the Codespaces guide already warns about this). They get no picture of what actually happens, so they can't debug it. (high)
+
+**Slide 1: how it works**
+
+```
+  Agent (Claude Code / Codex)  =  MCP client
+        │  at startup: "what tools do you have?"
+        │  then calls them like its own Read or Bash
+        ▼
+  MCP server  ──►  calendar, database, docs, Jira...
+   • stdio: a local program the agent starts (npx ..., uvx ...)
+   • HTTP:  a remote URL, often with an OAuth login
+```
+
+- The server advertises **tools**, each with a name, a description and inputs. The agent picks one the same way it picks a skill: by reading the description.
+- What a tool returns goes **into the context window**, so it costs space like anything else. Claude Code caps tool output (it warns at 10,000 tokens, and the default limit is 25,000) and loads tool definitions only when needed ("tool search"), so connecting a large server no longer fills the window up front.
+- **Permissions still apply.** Each tool call goes through the same approval dial as a shell command.
+
+**Slide 2: the commands**
+
+| | Claude Code | Codex |
+|---|---|---|
+| Add a remote server | `claude mcp add --transport http <name> <url>` | `codex mcp add <name> --url <url>` |
+| Add a local server | `claude mcp add <name> -- npx -y <package>` | `codex mcp add <name> -- npx -y <package>` |
+| Share it with the repo | `--scope project` writes `.mcp.json` | `.codex/config.toml`, `[mcp_servers.<name>]` |
+| Log in (OAuth) | `/mcp` → Authenticate | `codex mcp login <name>` |
+| See status | `/mcp`, `claude mcp list` | `/mcp` |
+
+The `--` matters. Everything after it is the server's own command, passed through untouched. Getting it wrong is the most common setup failure. (high for Claude Code; moderate on the Codex `--url` form, which the docs show only in an OAuth example)
+
+**Slide 3: trust.** An MCP server is code, or a remote service, that you are letting the agent act through. A server that fetches web pages or tickets can bring instructions in with the data (prompt injection). Claude Code asks before it uses a project's `.mcp.json` servers, and a cloned repo can't pre-approve its own servers. Install MCP servers as carefully as you'd add a dependency. This links to C4.
+
+**Lab: replace the calendar exercise with one that works for everyone with no login.** A documentation server such as Context7 suits returners particularly well: "check the current FastAPI docs and tell me whether this app's startup code uses a deprecated pattern". OpenAI's own MCP page uses Context7 as its example: `codex mcp add context7 -- npx -y @upstash/context7-mcp`. Claude Code: `claude mcp add context7 -- npx -y @upstash/context7-mcp`. Keep the calendar as a stretch, with a note that it must be connected at claude.ai first. (moderate that Context7 needs no key for light use; try it before the cohort)
+
 ---
 
 ## Minor: polish and correctness
@@ -250,9 +360,9 @@ The course connects MCP servers, runs agents with shell access, and touches API 
 - **Prompt injection:** a repo, issue or web page the agent reads can contain instructions. That is why permissions and the read-only reviewer matter. The Codespaces guide already makes this point about credentials in `~/.claude` and `~/.codex`. Bring it into the main deck.
 - **MCP servers are code you are trusting.** Install them as carefully as you would a dependency.
 
-### C5. Cost and limits (low to medium value)
+### C5. Cost and limits
 
-Returners may be paying for their own plan. One handout box: which plans include Claude Code (Pro and up; the free plan doesn't), what usage limits feel like in practice, `/usage` and `/model`, and "use a smaller model for routine work". The Codespaces guide covers compute cost well; this is the agent-side equivalent.
+Now covered by M7 (teaching) and by the prerequisites handout (which plan to buy).
 
 ### C6. The first two weeks back (low cost, likely appreciated)
 
@@ -275,6 +385,8 @@ Slide 68 gives a good tomorrow, this week, this month plan for the *harness*. Ad
 2. **M4:** move the `checkpoint-3-hardened` tag, or add a `-v2` tag?
 3. **Repo changes:** do you want me to make the small ones now? That means `.gitattributes`, a `.devcontainer`, the `.gitignore` line for worktrees, the CI version bumps, the Codespaces Vite snippet fix in the source `.docx`, and retiring `vibe.md`.
 4. **Codex worktrees:** do you want me to confirm the `--worktree` flag on a current Codex install before it goes on a slide?
+5. **M8 repo change:** should the `add-feature` skill files be added to the checkpoints now, which means moving `checkpoint-2-features` and `checkpoint-3-hardened`?
+6. **Pre-course check script:** do you want a `scripts/preflight.sh` that prints a pass or fail for each prerequisite? It would replace step 5 of the prerequisites handout with one command, and students could paste its output into WhatsApp.
 
 ---
 
@@ -284,6 +396,11 @@ Slide 68 gives a good tomorrow, this week, this month plan for the *harness*. Ad
 - Claude Code setup, Windows and Node 22 requirement: <https://code.claude.com/docs/en/setup>
 - Claude Code hooks (event list, Windows shell, `CLAUDE_PROJECT_DIR` behaviour): <https://code.claude.com/docs/en/hooks>
 - Claude Code common workflows: <https://code.claude.com/docs/en/common-workflows>
+- Claude Code skills: <https://code.claude.com/docs/en/skills>
+- Claude Code MCP: <https://code.claude.com/docs/en/mcp>
+- Claude Code model configuration (Opus 5.5 default on every plan, effort levels): <https://code.claude.com/docs/en/model-config>
+- Codex skills (`.agents/skills`, `$name`): <https://learn.chatgpt.com/docs/build-skills>
+- Codex MCP (`codex mcp add`, `[mcp_servers]`): <https://learn.chatgpt.com/docs/extend/mcp?surface=cli>
 - Codex hooks (on by default, 12 events, session `cwd`): <https://learn.chatgpt.com/docs/hooks> (redirected from developers.openai.com/codex/hooks)
 - Codex on Windows (native sandbox preferred, WSL2 optional): <https://learn.chatgpt.com/docs/windows/windows-sandbox>
 - Codex CLI worktrees, third-party only and unconfirmed: <https://omidsaffari.com/blog/codex-cli-0-154-worktrees>, <https://codex.danielvaughan.com/2026/03/26/codex-cli-worktree-parallel-development/>
