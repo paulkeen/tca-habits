@@ -168,7 +168,13 @@ cd tca-habits-reference
 ./scripts/setup.sh
 ```
 
-`setup.sh` takes a minute or two and ends with **"Setup complete."** Then start the app:
+`setup.sh` takes a minute or two and ends with **"Setup complete."** Now run the automatic check, which prints PASS or FAIL for every prerequisite:
+
+```bash
+./scripts/preflight.sh --agent
+```
+
+**Its output is what to paste into the WhatsApp group** if anything fails. Then start the app:
 
 ```bash
 ./scripts/dev.sh

@@ -10,6 +10,16 @@ Reviewed 17 October 2026, ahead of the next cohort.
 
 **Update, 17 October (after Paul's first read):** worktrees moving to Section 3 is agreed (M2). Three gaps Paul raised are added as M7 (`/model` and token spend, early in the day), M8 (skills) and M9 (how MCP works). The pre-course setup content now lives in a separate handout for students: `docs/TCA-prerequisites.md`.
 
+**Implementation status (17 October, second pass):** everything below has been implemented except where noted.
+
+| Item | Status |
+|---|---|
+| Repo: skills, `.gitattributes`, preflight, devcontainer, Codespaces host, worktrees ignore, CI bumps, Haiku 5.5 default, setup warnings, `vibe.md` removed | Done on `main` (`02c4026`, `cbe78ef`); CI green |
+| M4 checkpoint tags | Refreshed commits ready on branches `checkpoint-1-v3` and `checkpoint-2-v3`; **moving the tags is waiting on Paul** (the permission check blocked rewriting public tags) |
+| m14 `httpx` → `httpx2` | **Not done**: adding the new package was blocked by the permission check; waiting on Paul |
+| Deck, handbook, prerequisites | Rebuilt from a single content spec; see the files in `docs/` |
+| Codespaces guide | Not rebuilt. Its manual Step 2 still works, but the new `.devcontainer` now does it automatically |
+
 Confidence levels: **high** means I checked it in the files or the vendor docs. **Moderate** means it is well supported but I did not test it. **Low** means it rests on third-party sources or inference.
 
 ---
