@@ -20,9 +20,18 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Repo root (this file is <root>/.<tool>/hooks/guard_streak.py). git pathspecs are
-# cwd-relative, so anchor here rather than trusting the hook's working directory.
-REPO_ROOT = Path(__file__).resolve().parents[2]
+
+def repo_root(data: dict) -> str:
+    """The checkout the agent is working in. git pathspecs are cwd-relative, so
+    resolve the root from the hook input's cwd (which follows the agent into a
+    worktree) and fall back to the checkout this script lives in."""
+    top = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"],
+        cwd=data.get("cwd") or None,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    return top or str(Path(__file__).resolve().parents[2])
 
 
 def deny(reason: str) -> None:
@@ -59,7 +68,7 @@ def main() -> int:
 
     status = subprocess.run(
         ["git", "status", "--porcelain", "backend/tests"],
-        cwd=REPO_ROOT,
+        cwd=repo_root(data),
         capture_output=True,
         text=True,
     ).stdout
