@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .codex/hooks/guard_streak.py",
+            "command": "cd \"$(git rev-parse --show-toplevel)\" && python3 .codex/hooks/guard_streak.py",
             "statusMessage": "Checking streak-logic guardrail",
             "timeout": 30
           }
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "make -s check",
+            "command": "make -s -C \"$(git rev-parse --show-toplevel)\" check",
             "timeout": 600
           }
         ]

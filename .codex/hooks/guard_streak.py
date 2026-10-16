@@ -18,6 +18,11 @@ Wire it in .codex/hooks.json as a PreToolUse hook with matcher "apply_patch".
 import json
 import subprocess
 import sys
+from pathlib import Path
+
+# Repo root (this file is <root>/.<tool>/hooks/guard_streak.py). git pathspecs are
+# cwd-relative, so anchor here rather than trusting the hook's working directory.
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def deny(reason: str) -> None:
@@ -54,6 +59,7 @@ def main() -> int:
 
     status = subprocess.run(
         ["git", "status", "--porcelain", "backend/tests"],
+        cwd=REPO_ROOT,
         capture_output=True,
         text=True,
     ).stdout

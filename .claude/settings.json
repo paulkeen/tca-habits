@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "make -s check"
+            "command": "make -s -C \"$CLAUDE_PROJECT_DIR\" check"
           }
         ]
       }
