@@ -1,0 +1,5 @@
+# Keep shell scripts and the Makefile on LF even when cloned with Git for Windows
+# (core.autocrlf=true), or bash fails with "bash\r: No such file or directory".
+*.sh      text eol=lf
+Makefile  text eol=lf
+*.py      text eol=lf

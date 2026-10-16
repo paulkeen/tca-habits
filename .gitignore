@@ -31,14 +31,16 @@ dist/
 ~$*
 
 # ---- Claude Code ----
-# The shared project config IS committed on purpose: .claude/agents, .claude/commands,
+# The shared project config IS committed on purpose: .claude/agents, .claude/skills,
 # .claude/hooks and .claude/settings.json are course material. Only local, per-machine
 # state is ignored.
 .claude/settings.local.json
 .claude/*.local.json
+# Worktrees created by `claude --worktree <name>`
+.claude/worktrees/
 
 # ---- Codex ----
-# Likewise, .codex/agents, .codex/hooks(.json) and .codex/prompts are committed
+# Likewise, .codex/agents, .codex/hooks(.json) and .agents/skills are committed
 # course material. Ignore only local, per-machine overrides.
 .codex/*.local.*
 AGENTS.override.md

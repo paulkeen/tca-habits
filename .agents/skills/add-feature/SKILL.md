@@ -1,11 +1,11 @@
 ---
-description: Add a feature to TCA Habits the repeatable way — explore, plan, implement, run, summarise.
+name: add-feature
+description: Add or change a feature in TCA Habits the repeatable way (explore, plan, implement, run, summarise). Use when the user asks to add, build, extend or change app behaviour. Do not use for questions, explanations, code reviews or pure refactors with no behaviour change.
 ---
 
 You are adding a feature to the TCA Habits app. Follow this workflow exactly; do
-not skip straight to editing files.
-
-**Feature requested:** $ARGUMENTS
+not skip straight to editing files. The feature to add is whatever the user asked
+for when this skill was invoked.
 
 1. **Explore.** Read the files this feature will touch before proposing anything.
    For a backend change, that's usually `backend/main.py`, `backend/models.py`,
@@ -18,7 +18,7 @@ not skip straight to editing files.
    adding a column. Surface any real engineering decision (e.g. static vs. model
    call) rather than deciding silently. Wait for confirmation on anything risky.
 
-3. **Implement.** Make the change following the conventions in `AGENTS.md` —
+3. **Implement.** Make the change following the conventions in `AGENTS.md`,
    especially the weekday encoding, the fresh-streak-computation pattern, and the
    "adding a new habit field" checklist. Keep commits small and labelled.
 

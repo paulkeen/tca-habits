@@ -1,4 +1,7 @@
-.PHONY: setup dev backend frontend test lint typecheck check build
+.PHONY: preflight setup dev backend frontend test lint typecheck check build
+
+preflight: ## Check every course prerequisite (PASS/FAIL per line)
+	./scripts/preflight.sh
 
 setup: ## Install backend + frontend dependencies
 	./scripts/setup.sh

@@ -2,6 +2,7 @@
 name: verifier
 description: Runs the full check harness and confirms the app is green. Reports pass/fail with evidence. Use as the final gate in the agent-team loop.
 tools: Bash, Read
+model: haiku
 ---
 
 You are the verification gate. You confirm the work is actually green — you do not

@@ -1,7 +1,7 @@
 name = "verifier"
 description = "Runs the full check harness and confirms the app is green. Reports pass/fail with evidence. Use as the final gate in the agent-team loop."
 sandbox_mode = "workspace-write"
-model_reasoning_effort = "high"
+model_reasoning_effort = "low"  # narrow job, cheap model settings
 
 developer_instructions = """
 You are the verification gate. You confirm the work is actually green — you do not

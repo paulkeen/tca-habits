@@ -23,9 +23,17 @@ The SQLite database (`backend/habits.db`) is created automatically on first run,
 
 ### Prerequisites
 
-- [uv](https://docs.astral.sh/uv/) (manages Python 3.11+ and backend deps) — `brew install uv` or `curl -LsSf https://astral.sh/uv/install.sh | sh`
-- Node.js 18+
-- npm 9+
+- [uv](https://docs.astral.sh/uv/) (manages Python 3.11+ and backend deps): `brew install uv` or `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- Node.js 22+ and npm
+- git and make
+
+Run `./scripts/preflight.sh` (or `make preflight`) to check all of them at once; it prints PASS or FAIL per line with a fix for each failure. Add `--agent` to also confirm Claude Code is logged in.
+
+### Windows
+
+Use **WSL2** (Ubuntu) or **GitHub Codespaces**; native Windows shells are not supported, because the scripts and the `Makefile` need bash and make. In WSL, clone into your Linux home folder (`cd ~`), not under `/mnt/c/`, and check that `which node` shows a `/home/...` path. The browser stays on Windows: open `http://localhost:5173` as usual.
+
+The repo includes a `.devcontainer/`, so a codespace installs uv, Claude Code, Codex and the app's dependencies for you.
 
 ### Running services individually
 
@@ -137,7 +145,7 @@ runs from a clean clone with no configuration.
 ```bash
 cd backend && uv sync --extra ai       # install the anthropic package
 export ANTHROPIC_API_KEY=sk-ant-...    # then run the app as usual
-# optional: export ANTHROPIC_MODEL=claude-haiku-4-5   (the default)
+# optional: export ANTHROPIC_MODEL=claude-haiku-5-5   (the default)
 ```
 
 Responses include a `source` field (`"model"` or `"template"`); the UI shows an

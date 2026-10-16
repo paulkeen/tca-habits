@@ -1,0 +1,18 @@
+{
+  // GitHub Codespaces setup for the course. The universal image already has
+  // Node, Python, git, make and the GitHub CLI; post-create.sh adds uv and the
+  // two agents and installs the app, so a rebuild repairs itself.
+  "name": "TCA Habits",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "forwardPorts": [5173, 8000],
+  "portsAttributes": {
+    "5173": { "label": "TCA Habits (web)", "onAutoForward": "notify" },
+    "8000": { "label": "TCA Habits (api)", "onAutoForward": "silent" }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python", "charliermarsh.ruff"]
+    }
+  }
+}

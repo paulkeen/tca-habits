@@ -73,7 +73,7 @@ backend/
 
 **Tailwind v4:** Uses `@tailwindcss/vite` plugin, not the classic PostCSS config. Theme tokens are CSS custom properties in `index.css`, not `tailwind.config.js`.
 
-**AI features (optional):** `GET /stats/weekly-summary` and `GET /encouragement` return copy that is model-written when `ANTHROPIC_API_KEY` is set (and `uv sync --extra ai` has installed the `anthropic` package), and a deterministic template otherwise. All model calls go through `ai.generate()` in `backend/ai.py`, which never raises — any failure returns the template. Responses carry a `source` field (`"model"` or `"template"`) so the UI can badge AI-written text. The clean-clone default is template mode; **never make these endpoints require a key.** Model defaults to `claude-haiku-4-5`, overridable via `ANTHROPIC_MODEL`.
+**AI features (optional):** `GET /stats/weekly-summary` and `GET /encouragement` return copy that is model-written when `ANTHROPIC_API_KEY` is set (and `uv sync --extra ai` has installed the `anthropic` package), and a deterministic template otherwise. All model calls go through `ai.generate()` in `backend/ai.py`, which never raises — any failure returns the template. Responses carry a `source` field (`"model"` or `"template"`) so the UI can badge AI-written text. The clean-clone default is template mode; **never make these endpoints require a key.** Model defaults to `claude-haiku-5-5`, overridable via `ANTHROPIC_MODEL`.
 
 **Streak logic is guarded:** a `PreToolUse` hook blocks edits to `compute_streak`/streak logic in `main.py` unless a test under `backend/tests/` also changes. Never change the streak calculation without a test — this is enforced, not just documented. (Claude Code: `.claude/hooks/guard_streak.py`; Codex: `.codex/hooks/guard_streak.py`.)
 
@@ -88,8 +88,12 @@ you change one.
 |---|---|---|
 | Project contract | `CLAUDE.md` → `@AGENTS.md` (this file) | `AGENTS.md` (this file), read directly |
 | Sub-agents | `.claude/agents/*.md` | `.codex/agents/*.toml` |
-| Reusable "add a feature" workflow | `.claude/commands/add-feature.md` (`/add-feature`) | `.codex/prompts/add-feature.md` (copy to `~/.codex/prompts/`) |
+| Reusable "add a feature" skill | `.claude/skills/add-feature/SKILL.md` (`/add-feature`) | `.agents/skills/add-feature/SKILL.md` (`$add-feature`) |
 | Guardrail + self-verify hooks | `.claude/settings.json` + `.claude/hooks/guard_streak.py` | `.codex/hooks.json` + `.codex/hooks/guard_streak.py` |
+
+The two `SKILL.md` files are identical (same format in both tools); keep them
+byte-for-byte in sync. Hooks find the repo root with `git rev-parse --show-toplevel`
+so they work from any subdirectory and inside a worktree; keep it that way.
 
 Both toolchains define the same three narrow sub-agents — **test-writer** (failing
 tests first), **reviewer** (read-only, reports problems, never edits), and

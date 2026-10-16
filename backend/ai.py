@@ -18,7 +18,7 @@ import os
 
 # Haiku is the right tier for short, high-volume, latency-sensitive copy like a
 # one-line nudge. Override with ANTHROPIC_MODEL if you want Sonnet/Opus quality.
-DEFAULT_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-haiku-4-5")
+DEFAULT_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-haiku-5-5")
 
 
 def _client():
