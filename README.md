@@ -31,7 +31,16 @@ Run `./scripts/preflight.sh` (or `make preflight`) to check all of them at once;
 
 ### Windows
 
-Use **WSL2** (Ubuntu) or **GitHub Codespaces**; native Windows shells are not supported, because the scripts and the `Makefile` need bash and make. In WSL, clone into your Linux home folder (`cd ~`), not under `/mnt/c/`, and check that `which node` shows a `/home/...` path. The browser stays on Windows: open `http://localhost:5173` as usual.
+Use **WSL2** (Ubuntu) or **GitHub Codespaces**; native Windows shells are not supported, because the scripts and the `Makefile` need bash and make.
+
+The quickest route is one line in Windows PowerShell, which turns on WSL2, installs Ubuntu and every prerequisite, clones the reference app into `~/tca-habits-reference` and runs the preflight check (safe to re-run, for example after the restart it may ask for):
+
+```powershell
+irm https://raw.githubusercontent.com/paulkeen/tca-habits/main/scripts/install-windows.ps1 | iex
+```
+
+On Ubuntu or Debian, `scripts/install-ubuntu.sh` does the same without the WSL part.
+ In WSL, clone into your Linux home folder (`cd ~`), not under `/mnt/c/`, and check that `which node` shows a `/home/...` path. The browser stays on Windows: open `http://localhost:5173` as usual.
 
 The repo includes a `.devcontainer/`, so a codespace installs uv, Claude Code, Codex and the app's dependencies for you.
 

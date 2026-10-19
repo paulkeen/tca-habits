@@ -25,9 +25,9 @@ You don't need to understand any of the commands below. Copy each grey box into 
 | Your laptop | Follow |
 |---|---|
 | Mac | **Step 3A** |
-| Windows, and you can run things as Administrator | **Step 3B** (WSL, which gives you a Linux terminal inside Windows) |
-| Windows, no admin rights, or a locked-down work laptop | The **Codespaces Setup** guide, then Step 4 onwards |
-| Linux | Step 3B from "Inside Ubuntu" onwards, using your own package manager |
+| Windows | **Step 3B**: one command does everything |
+| Windows work laptop where you can't approve "allow this app to make changes" | The **Codespaces Setup** guide, then Step 4 onwards |
+| Linux (Ubuntu or Debian) | **Step 3C**: one command does everything |
 
 ---
 
@@ -35,13 +35,7 @@ You don't need to understand any of the commands below. Copy each grey box into 
 
 Open **Terminal** (press Cmd+Space, type *Terminal*, press Enter).
 
-**1. Apple's developer tools** (gives you `git` and `make`). A window pops up; click Install. Skip this if it says they're already installed.
-
-```bash
-xcode-select --install
-```
-
-**2. Homebrew**, the Mac package installer. Skip this if `brew --version` already prints a version. It asks for your Mac password.
+**1. Homebrew**, the Mac package installer. Skip this if `brew --version` already prints a version. It asks for your Mac password, and it also installs Apple's developer tools (`git` and `make`), so on a new Mac it can sit quietly for 5 to 10 minutes. Let it run.
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -49,13 +43,13 @@ xcode-select --install
 
 When it finishes, it prints two or three lines under **"Next steps"**. Copy and run those too, then **close Terminal and open a new one**.
 
-**3. Node, Python and uv:**
+**2. Node, Python and uv:**
 
 ```bash
 brew install node python uv
 ```
 
-**4. Claude Code:**
+**3. Claude Code:**
 
 ```bash
 curl -fsSL https://claude.ai/install.sh | bash
@@ -65,52 +59,48 @@ Close Terminal and open a new one, then go to **Step 4**.
 
 ---
 
-## Step 3B · Windows setup with WSL (20 minutes, plus a restart)
+## Step 3B · Windows setup (one command, about 30 minutes)
 
-**1. Turn on WSL.** Click Start, type *PowerShell*, right-click **Windows PowerShell** and choose **Run as administrator**. Then run:
+A setup script does all of it for you. It turns on WSL (a Linux system that runs inside Windows), installs Ubuntu, installs every tool the course needs, then downloads the course app and checks it.
+
+**1.** Click Start, type *PowerShell*, and open **Windows PowerShell**. You don't need "Run as administrator".
+
+**2.** Paste this line and press Enter:
 
 ```powershell
-wsl --install -d Ubuntu
+irm https://raw.githubusercontent.com/paulkeen/tca-habits/main/scripts/install-windows.ps1 | iex
 ```
 
-**Restart your computer** when it asks. Afterwards an **Ubuntu** window opens (or find *Ubuntu* in the Start menu). It asks you to choose a username and password. Write the password down: you'll need it in a moment.
+**3.** Leave the window open. It may ask you to do three things:
 
-**2. Inside Ubuntu**, run each box in turn. From here on, *always use the Ubuntu window*, not PowerShell.
+- **"Do you want to allow this app to make changes?"** Click **Yes**. It asks once, to turn WSL on.
+- **"RESTART YOUR COMPUTER"**. Restart, open PowerShell again, and paste the same line. It carries on from where it stopped.
+- **Choose an Ubuntu username and password.** Use lowercase letters for the username. The password shows nothing as you type; that's normal. Write it down. When you see a prompt ending in `$`, type `exit` and press Enter.
 
-```bash
-sudo apt update && sudo apt install -y make git curl unzip
-git config --global core.autocrlf input
-```
-
-(`sudo` asks for the Ubuntu password you just chose. Nothing appears on screen while you type it. That's normal.)
-
-**3. Node** (via nvm, a Node version manager):
-
-```bash
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-source ~/.bashrc
-nvm install 22
-```
-
-**4. uv and Claude Code:**
-
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-curl -fsSL https://claude.ai/install.sh | bash
-```
-
-Close the Ubuntu window, open a new one, then go to **Step 4**.
+It ends with a list of **PASS** lines and **Setup finished.** Skip Step 4 (the script has already checked everything) and go to **Step 5**.
 
 **Two Windows rules for the day:**
 
-- Keep your work in the Ubuntu home folder (`~`). **Don't** work in `/mnt/c/...`, where everything runs much slower.
+- From now on, use the **Ubuntu** app (Start menu, type *Ubuntu*) for every command in the course, not PowerShell. Your work lives in its home folder (`~`); **don't** work in `/mnt/c/...`, where everything runs much slower.
 - Open the app in your normal Windows browser at `http://localhost:5173`. It works across from Ubuntu automatically.
+
+---
+
+## Step 3C · Linux setup (one command, about 15 minutes)
+
+On Ubuntu or Debian, open a terminal and run:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/paulkeen/tca-habits/main/scripts/install-ubuntu.sh | bash
+```
+
+It asks for your password once (for the system packages), installs everything, downloads the course app and ends with a list of **PASS** lines. Open a new terminal and go to **Step 5**. On another distribution, install `make`, `git`, Node 22, Python 3.11, uv and Claude Code yourself, then do Step 4.
 
 ---
 
 ## Step 4 · Check everything installed (2 minutes)
 
-Run this. **Every line must print a version number, not an error.**
+Mac and Codespaces only; on Windows and Linux the script did this for you. Run this. **Every line must print a version number, not an error.**
 
 ```bash
 claude --version
@@ -119,12 +109,6 @@ make --version | head -1
 node --version      # must be v22 or higher
 python3 --version   # must be 3.11 or higher
 uv --version
-```
-
-**Windows only.** This line must show paths starting `/home/`, **not** `/mnt/c/`:
-
-```bash
-which node claude
 ```
 
 Optional, if you have a ChatGPT plan:
@@ -161,6 +145,8 @@ Choose **Sonnet** and press Enter. Claude Code remembers this for future session
 
 This downloads the course's reference app, which is your safety net on the day, and proves everything works together.
 
+**Mac and Codespaces** (on Windows and Linux the script already did this box, so skip it):
+
 ```bash
 cd ~
 git clone https://github.com/paulkeen/tca-habits.git tca-habits-reference
@@ -168,9 +154,12 @@ cd tca-habits-reference
 ./scripts/setup.sh
 ```
 
-`setup.sh` takes a minute or two and ends with **"Setup complete."** Now run the automatic check, which prints PASS or FAIL for every prerequisite:
+`setup.sh` takes a minute or two and ends with **"Setup complete."**
+
+**Everyone:** run the automatic check, which prints PASS or FAIL for every prerequisite and asks Claude one tiny question to prove your login works:
 
 ```bash
+cd ~/tca-habits-reference
 ./scripts/preflight.sh --agent
 ```
 
@@ -208,8 +197,11 @@ It should describe a habit tracker and mention `make test` or `make check`. Type
 |---|---|
 | `command not found` straight after installing something | Close the terminal and open a new one. Installers update your settings, but only new terminals see the change. |
 | `claude` asks you to upgrade, or says your plan doesn't include Claude Code | You're on the free plan. Upgrade to Pro at claude.ai. |
-| `node --version` shows v18 or v20 | **Mac:** `brew upgrade node`. **Windows:** `nvm install 22` in Ubuntu. |
-| `which node` shows `/mnt/c/...` (Windows) | Ubuntu is finding the Windows copy of Node. Rerun the Node steps in 3B, then open a new Ubuntu window. |
+| `node --version` shows v18 or v20 | **Mac:** `brew upgrade node`. **Windows and Linux:** run the setup command again. |
+| `irm is not recognized` (Windows) | You're in Command Prompt, not PowerShell. Open **Windows PowerShell** and paste the line again. |
+| The Windows script mentions **virtualization** or error `0x80370102` | Virtualization is switched off in your PC's firmware settings. Post in the WhatsApp group; if it's a work laptop, use the **Codespaces Setup** guide instead. |
+| Preflight says WSL is using the Windows copy of a tool (`/mnt/c/...`) | Paste the Windows setup line into PowerShell again; it installs the Linux copy. Then open a new Ubuntu window. |
+| `xcrun: error: invalid active developer path` (Mac) | Usually after a macOS update. Run `xcode-select --install`, click Install, then open a new Terminal. |
 | `./scripts/setup.sh: Permission denied` | Run `bash scripts/setup.sh` instead. |
 | `bash\r: No such file or directory` (Windows) | The repo was cloned with Windows line endings. Run `git config --global core.autocrlf input`, delete the folder, and clone again **inside Ubuntu**. |
 | Port 5173 or 8000 "already in use" | An earlier `dev.sh` is still running in another terminal. Close it, or restart the terminal. |
