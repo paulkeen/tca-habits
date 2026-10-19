@@ -16,7 +16,7 @@ You don't need to understand any of the commands below. Copy each grey box into 
 | **GitHub** | **Yes** | A free account at [github.com](https://github.com) is fine. |
 | ChatGPT Plus or higher | Optional | Only if you'd like to try OpenAI Codex as well. Everything in the course works with Claude alone. |
 
-**Using a work laptop?** Check now that you can install software and that your company network doesn't block `claude.ai`. If you can't install anything, follow the separate **Codespaces Setup** guide instead of steps 2 and 3, then come back for steps 4 to 6.
+**Using a work laptop?** Check now that you can install software and that your company network doesn't block `claude.ai`. If you can't install anything, follow the separate **Codespaces Setup** guide instead of steps 2 to 6. It covers logging in and the final check too.
 
 ---
 
@@ -26,7 +26,7 @@ You don't need to understand any of the commands below. Copy each grey box into 
 |---|---|
 | Mac | **Step 3A** |
 | Windows | **Step 3B**: one command does everything |
-| Windows work laptop where you can't approve "allow this app to make changes" | The **Codespaces Setup** guide, then Step 4 onwards |
+| Windows work laptop where you can't approve "allow this app to make changes" | The **Codespaces Setup** guide, in place of Steps 2 to 6 |
 | Linux (Ubuntu or Debian) | **Step 3C**: one command does everything |
 
 ---
@@ -100,7 +100,7 @@ It asks for your password once (for the system packages), installs everything, d
 
 ## Step 4 · Check everything installed (2 minutes)
 
-Mac and Codespaces only; on Windows and Linux the script did this for you. Run this. **Every line must print a version number, not an error.**
+Mac only; on Windows and Linux the script did this for you. Run this. **Every line must print a version number, not an error.**
 
 ```bash
 claude --version
@@ -145,7 +145,7 @@ Choose **Sonnet** and press Enter. Claude Code remembers this for future session
 
 This downloads the course's reference app, which is your safety net on the day, and proves everything works together.
 
-**Mac and Codespaces** (on Windows and Linux the script already did this box, so skip it):
+**Mac only** (on Windows and Linux the script already did this box, so skip it):
 
 ```bash
 cd ~
