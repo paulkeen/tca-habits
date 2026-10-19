@@ -34,7 +34,7 @@ make check          # = make lint + make typecheck + make test
 make build          # or: cd frontend && npm run build
 ```
 
-Prerequisites: Python 3.11+, Node.js 18+, npm 9+, `uv` (https://docs.astral.sh/uv/)
+Prerequisites: Python 3.11+, Node.js 22+ (Vite 7 needs 20.19+), npm 9+, `uv` (https://docs.astral.sh/uv/)
 
 ## Architecture
 
